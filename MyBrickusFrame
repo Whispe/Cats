@@ -9,7 +9,6 @@ import javax.swing.*;
 
 import edu.jhu.cs.oose.fall2013.brickus.iface.*;
 
-//REVIVE: remove print statements
 @SuppressWarnings("serial")
 public class MyBrickusFrame extends JFrame {
 
@@ -120,7 +119,6 @@ class Composite extends JComponent {
 				}
 			}
 		}
-		//I HAVE THE SELECTED PIECE
 		board.pieceSelected();
 	}
 	
@@ -199,10 +197,10 @@ class Composite extends JComponent {
 					mygrid[y][x] = 0;
 				}
 			}
-			mygrid[0][0] = 1;
+			/*mygrid[0][0] = 1;
 			mygrid[2][2] = 2;
 			mygrid[4][4] = 3;
-			mygrid[6][6] = 4;
+			mygrid[6][6] = 4;*/
 			
 	        MouseAdapter mouseHandler;
 	        mouseHandler = new MouseAdapter() {
@@ -261,9 +259,9 @@ class Composite extends JComponent {
 			model.placePiece(placingPlayer, coveredx, coveredy, activePiece);
 			if(placingPlayer != model.getActivePlayer())
 			{ //successful placement so update model
-				for(int row = 0; row < thepiece.length; row++){
-					for(int col = 0; col < thepiece[0].length; col++){
-						if(thepiece[row][col] == 1){
+				for(int row = 0; row < activePiece.getHeight(); row++){
+					for(int col = 0; col < activePiece.getWidth(); col++){
+						if(activePiece.isOccupied(col, row)){
 							mygrid[coveredy+row][coveredx+col] = playerNum; 		
 						}
 					}
@@ -405,11 +403,17 @@ class Composite extends JComponent {
 		
 		public void updateSinglePiece(BrickusModel model, MyMouseListener myListener) {
 			
+			int count = 0;
+			
 			this.removeAll();
 			this.repaint();
-			//this.setBackground(Color.white);
 			for(BrickusPiece piece: model.getPieces(model.getActivePlayer())) {
 				SinglePiece newPiece = new SinglePiece(model, piece, myListener);
+				this.add(newPiece);
+				count++;
+			}
+			for(int i=count; i<21; i++) {
+				SinglePiece newPiece = new SinglePiece(model, null, null);
 				this.add(newPiece);
 			}
 		}
@@ -421,6 +425,11 @@ class Composite extends JComponent {
 		
 		public SinglePiece(BrickusModel model, BrickusPiece piece, MyMouseListener myListener) {
 			mypiece = piece;
+			
+			if(piece == null) {
+				return;
+			}
+			
 			this.setLayout(new GridLayout(5, 5));
 			this.setBackground(Color.white);
 			this.addMouseListener(myListener);
@@ -444,7 +453,7 @@ class Composite extends JComponent {
 					for(int i=0; i<5; i++) {
 						
 						JPanel brick = new JPanel();
-						brick.setBackground(Color.white);
+						brick.setOpaque(false);
 						this.add(brick);
 					}
 				}
@@ -455,7 +464,7 @@ class Composite extends JComponent {
 						if(w<widthBuffer) {
 							
 							JPanel brick = new JPanel();
-							brick.setBackground(Color.white);
+							brick.setOpaque(false);
 							this.add(brick);
 						}
 						else {
@@ -467,6 +476,7 @@ class Composite extends JComponent {
 							}
 							else {
 								brick.setBackground(Color.white);
+								brick.setOpaque(false);
 							}
 							this.add(brick);
 						}
@@ -505,6 +515,13 @@ class Composite extends JComponent {
 			this.setBackground(Color.yellow);
 			return mypiece;
 		}
+		
+		public BrickusPiece unselected() {
+			
+			this.setBackground(Color.white);
+			return mypiece; //WHISPE
+		}
+		
 /*		public void paintComponent(Graphics g) {
 			;
 		}*/
