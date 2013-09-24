@@ -33,7 +33,7 @@ public class MyBrickusFrame extends JFrame {
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		composite = new Composite(model);
+		composite = new Composite(model, frame);
 		frame.getContentPane().add(BorderLayout.CENTER, composite);
 		
 		frame.setSize(670,710);
@@ -56,14 +56,16 @@ class Composite extends JComponent {
 	Color player2colorhalf;
 	boolean pieceSelected;
 	MyMouseListener myListener;
+	JFrame frame;
 	
-	public Composite(BrickusModel model) {
+	public Composite(BrickusModel model, JFrame frame) {
 		player1color = Color.decode("#0000CC");
 		player2color = Color.decode("#CC0000");
 		player1colorhalf = new Color(0,0,204,120);
 		player2colorhalf = new Color(204,0,0,120);
 		
 		this.model = model;
+		this.frame = frame;
 		
 		this.setLayout(new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
@@ -162,6 +164,11 @@ class Composite extends JComponent {
 		}
 	}
 	
+	public void closeGame() {
+		
+		frame.setVisible(false);
+	}
+	
 	class MyBrickusBoard extends JComponent {
 
 		int numCol;
@@ -170,6 +177,7 @@ class Composite extends JComponent {
 		int coveredx, coveredy; // the indices of the cell over which the mouse is currently.
 		Point coveredCell;
 		int cellWidth = 20;
+		MouseAdapter mouseHandler;
 		
 		public MyBrickusBoard(BrickusModel model, MyMouseListener myListener) {
 			
@@ -218,6 +226,7 @@ class Composite extends JComponent {
 	
 	            }
 	        };
+	        this.mouseHandler = mouseHandler;
 	        
 	        addMouseMotionListener(mouseHandler);
 	        addMouseListener(mouseHandler);
@@ -396,9 +405,11 @@ class Composite extends JComponent {
 			
 			for(BrickusPiece piece: model.getPieces(model.getActivePlayer())) {
 				SinglePiece newPiece = new SinglePiece(model, piece, myListener);
-				if(activepiece.piece == piece) {
+				if(activepiece != null) {
+					if(activepiece.piece == piece) {
 					
 					newPiece.selected();
+					}
 				}
 				this.add(newPiece);
 				count++;
@@ -584,11 +595,16 @@ class MyBrickusListener implements BrickusListener {
 	public void modelChanged(BrickusEvent event) {
 		
 		if(!event.isGameOver()) {
+			
 			composite.updateScores(composite.model.calculateScore(Player.PLAYER1), composite.model.calculateScore(Player.PLAYER2));
 			composite.updateSinglePiece(composite.model);
 		}
 		else {
+			
+			composite.board.removeMouseListener(composite.board.mouseHandler);
 			composite.tray.passButton.removeActionListener(composite.tray.buttonListener);
+			composite.removeMouseListener(composite.myListener);
+			
 			if(composite.model.calculateScore(Player.PLAYER1) > composite.model.calculateScore(Player.PLAYER2)) {
 				
 				composite.updateErrorMessage("Game over. Player 1 won with " + composite.model.calculateScore(Player.PLAYER1) + " points.");
@@ -601,7 +617,27 @@ class MyBrickusListener implements BrickusListener {
 				
 				composite.updateErrorMessage("Game over. Players tied.");
 			}
+			
+			composite.tray.passButton.setText("New game");
+			composite.tray.passButton.removeActionListener(composite.tray.buttonListener);
+			composite.tray.passButton.addActionListener(new MyEndButtonListener(composite));
 		}
+	}
+}
+
+class MyEndButtonListener implements java.awt.event.ActionListener {
+	
+	Composite composite;
+	
+	public MyEndButtonListener(Composite composite) {
+		
+		this.composite = composite;
+	}
+	
+	public void actionPerformed(ActionEvent event) {
+	
+		composite.closeGame();
+		MyBrickusFrame.main(null);
 	}
 }
 
