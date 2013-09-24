@@ -57,6 +57,7 @@ class Composite extends JComponent {
 	boolean pieceSelected;
 	MyMouseListener myListener;
 	JFrame frame;
+	MyBrickusListener modelListener;
 	
 	public Composite(BrickusModel model, JFrame frame) {
 		player1color = Color.decode("#0000CC");
@@ -73,7 +74,7 @@ class Composite extends JComponent {
 
 		MyMouseListener myListener = new MyMouseListener(this);
 		
-		MyBrickusListener modelListener = new MyBrickusListener(this);
+		modelListener = new MyBrickusListener(this);
 		model.addBrickusListener(modelListener);
 		board = new MyBrickusBoard(model, myListener);
 		board.setBorder(BorderFactory.createLineBorder(Color.black));
@@ -136,7 +137,7 @@ class Composite extends JComponent {
 		
 		if(pieceSelected){
 			activepiece.piece.flipHorizontally();
-			activepiece = new SinglePiece(model, activepiece.piece, myListener); //WHISPE
+			activepiece = new SinglePiece(model, activepiece.piece, myListener);
 		}
 	}
 
@@ -144,7 +145,7 @@ class Composite extends JComponent {
 		
 		if(pieceSelected){
 			activepiece.piece.flipVertically();
-			activepiece = new SinglePiece(model, activepiece.piece, myListener); //WHISPE
+			activepiece = new SinglePiece(model, activepiece.piece, myListener);
 		}
 	}
 	
@@ -152,7 +153,7 @@ class Composite extends JComponent {
 		
 		if(pieceSelected){
 			activepiece.piece.rotateCounterClockwise();
-			activepiece = new SinglePiece(model, activepiece.piece, myListener); //WHISPE
+			activepiece = new SinglePiece(model, activepiece.piece, myListener);
 		}
 	}
 	
@@ -160,13 +161,18 @@ class Composite extends JComponent {
 		
 		if(pieceSelected){
 			activepiece.piece.rotateClockwise();
-			activepiece = new SinglePiece(model, activepiece.piece, myListener); //WHISPE
+			activepiece = new SinglePiece(model, activepiece.piece, myListener);
 		}
 	}
 	
 	public void closeGame() {
 		
 		frame.setVisible(false);
+	}
+	
+	public void removeAllListeners() {
+		
+		model.removeBrickusListener(modelListener);
 	}
 	
 	class MyBrickusBoard extends JComponent {
@@ -228,8 +234,8 @@ class Composite extends JComponent {
 	        };
 	        this.mouseHandler = mouseHandler;
 	        
-	        addMouseMotionListener(mouseHandler);
-	        addMouseListener(mouseHandler);
+	        this.addMouseMotionListener(mouseHandler);
+	        this.addMouseListener(mouseHandler);
 	        this.addMouseListener(myListener);
 	        this.addMouseWheelListener(myListener);
 	        
@@ -404,11 +410,13 @@ class Composite extends JComponent {
 			this.repaint();
 			
 			for(BrickusPiece piece: model.getPieces(model.getActivePlayer())) {
+				
 				SinglePiece newPiece = new SinglePiece(model, piece, myListener);
 				if(activepiece != null) {
+					
 					if(activepiece.piece == piece) {
 					
-					newPiece.selected();
+						newPiece.selected();
 					}
 				}
 				this.add(newPiece);
@@ -416,6 +424,7 @@ class Composite extends JComponent {
 			}
 			
 			for(int i=count; i<21; i++) {
+				
 				SinglePiece newPiece = new SinglePiece(model, null, null);
 				this.add(newPiece);
 			}
@@ -429,13 +438,13 @@ class Composite extends JComponent {
 		public SinglePiece(BrickusModel model, BrickusPiece piece, MyMouseListener myListener) {
 			
 			this.piece = piece;
+			this.setLayout(new GridLayout(5, 5));
+			this.setBackground(Color.white);
 			
 			if(piece == null) {
 				return;
 			}
 			
-			this.setLayout(new GridLayout(5, 5));
-			this.setBackground(Color.white);
 			this.addMouseListener(myListener);
 			this.addMouseWheelListener(myListener);
 			
@@ -490,6 +499,12 @@ class Composite extends JComponent {
 			}
 		}
 		
+		/**
+		 * 
+		 * @param pieceDimension the height or width of the Brickus piece being centered in the 5x5 grid.
+		 * @return the number of rows (for height) or columns (for width) that must be skipped to center a piece
+		 * in a 5x5 grid.
+		 */
 		public int calculateBuffer(int pieceDimension) {
 			
 			int buffer = 0;
@@ -514,11 +529,18 @@ class Composite extends JComponent {
 			
 			return buffer;
 		}
+		
+		/**
+		 * Highlights in yellow the piece in the piece tray that the active player has clicked on.
+		 */
 		public void selected() {
 			
 			this.setBackground(Color.yellow);
 		}
 		
+		/**
+		 * Removes the yellow highlight for a piece in the tray after the active player has clicked on a different piece.
+		 */
 		public void unselected() {
 			
 			this.setBackground(Color.white);
@@ -587,11 +609,19 @@ class MyBrickusListener implements BrickusListener {
 		this.composite = composite;
 	}
 	
+	/**
+	 * Updates the game interface when an illegal move is made.
+	 * Specifically, 
+	 */
 	public void illegalMove(BrickusIllegalMoveEvent event) {
 	
 		composite.updateErrorMessage(event.getMessage());
 	}
 
+	/**
+	 * Updates the game interface when the BrickusModel model is changed.
+	 * @param event The BrickusEvent which changed the model.
+	 */
 	public void modelChanged(BrickusEvent event) {
 		
 		if(!event.isGameOver()) {
@@ -601,9 +631,7 @@ class MyBrickusListener implements BrickusListener {
 		}
 		else {
 			
-			composite.board.removeMouseListener(composite.board.mouseHandler);
-			composite.tray.passButton.removeActionListener(composite.tray.buttonListener);
-			composite.removeMouseListener(composite.myListener);
+			composite.removeAllListeners();
 			
 			if(composite.model.calculateScore(Player.PLAYER1) > composite.model.calculateScore(Player.PLAYER2)) {
 				
@@ -625,6 +653,10 @@ class MyBrickusListener implements BrickusListener {
 	}
 }
 
+/**
+ * An ActionListener class which listens for the "New Game" button to be clicked and creates a new game when
+ * the event occurs.
+ */
 class MyEndButtonListener implements java.awt.event.ActionListener {
 	
 	Composite composite;
@@ -641,6 +673,10 @@ class MyEndButtonListener implements java.awt.event.ActionListener {
 	}
 }
 
+/**
+ * An ActionListener class which listens for the "Pass" button to be clicked and changes the active player
+ * when clicked.
+ */
 class MyButtonListener implements java.awt.event.ActionListener {
 
 	public BrickusModel model;
