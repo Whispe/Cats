@@ -12,7 +12,6 @@ import edu.jhu.cs.oose.fall2013.brickus.iface.*;
 @SuppressWarnings("serial")
 public class MyBrickusFrame extends JFrame {
 
-	JFrame frame;
 	BrickusModel model;
 	Composite composite;
 	
@@ -30,15 +29,14 @@ public class MyBrickusFrame extends JFrame {
 	
 	public void go() {
 		
-		frame = new JFrame();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		composite = new Composite(model, frame);
-		frame.getContentPane().add(BorderLayout.CENTER, composite);
+		composite = new Composite(model, this);
+		this.getContentPane().add(BorderLayout.CENTER, composite);
 		
-		frame.setSize(670,710);
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);
+		this.setSize(670,710);
+		this.setLocationRelativeTo(null);
+		this.setVisible(true);
 	}
 }
 
@@ -59,7 +57,7 @@ class Composite extends JComponent {
 	JFrame frame;
 	MyBrickusListener modelListener;
 	
-	public Composite(BrickusModel model, JFrame frame) {
+	public Composite(BrickusModel model, MyBrickusFrame frame) {
 		player1color = Color.decode("#0000CC");
 		player2color = Color.decode("#CC0000");
 		player1colorhalf = new Color(0,0,204,120);
