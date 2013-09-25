@@ -112,6 +112,7 @@ public class MyBrickusFrame extends JFrame {
 		activepiece = panel;
 		activepiece.selected();
 		board.pieceSelected();
+		updateSinglePiece();
 	}
 	
 	/**
@@ -202,6 +203,10 @@ public class MyBrickusFrame extends JFrame {
 	public void removeAllListeners() {
 		
 		model.removeBrickusListener(modelListener);
+		board.removeMouseMotionListener(board.mouseHandler);
+		board.removeMouseListener(board.mouseHandler);
+		board.removeMouseListener(myListener);
+		board.removeMouseWheelListener(myListener);
 	}
 	
 	/**
@@ -586,24 +591,26 @@ public class MyBrickusFrame extends JFrame {
 			this.removeAll();
 			this.repaint();
 			
-			for(BrickusPiece piece: model.getPieces(model.getActivePlayer())) {
+			if(model.getActivePlayer() != null) {
+				for(BrickusPiece piece: model.getPieces(model.getActivePlayer())) {
 				
-				SinglePiece newPiece = new SinglePiece(piece, true);
-				if(activepiece != null) {
+					SinglePiece newPiece = new SinglePiece(piece, true);
+					if(activepiece != null) {
 					
-					if(activepiece.piece == piece) {
+						if(activepiece.piece == piece) {
 						
-						newPiece.selected();
+							newPiece.selected();
+						}
 					}
+					this.add(newPiece);
+					count++;
 				}
-				this.add(newPiece);
-				count++;
-			}
 				
-			for(int i=count; i<21; i++) {
+				for(int i=count; i<21; i++) {
 					
-				SinglePiece newPiece = new SinglePiece(null, false);
-				this.add(newPiece);
+					SinglePiece newPiece = new SinglePiece(null, false);
+					this.add(newPiece);
+				}
 			}
 		}
 	}
