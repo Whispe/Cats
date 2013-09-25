@@ -698,7 +698,9 @@ class Composite extends JComponent {
 			JPanel subpanelLeft = new JPanel(new BorderLayout());
 			JPanel subpanelRight = new JPanel(new FlowLayout(FlowLayout.TRAILING));
 			
-			errorText = new JLabel();
+			errorText = new JLabel("<html><font color = 000000>Welcome to Brickus! </font>");
+			errorText.setText(errorText.getText() + "<font color=0000CC>Player 1 </font>");
+			errorText.setText(errorText.getText() + "<font color = 000000>to move.</font");
 			
 			player1Score = new JLabel("<html><font color = 0000CC>Score: 0 </font>");
 			player2Score = new JLabel("<html><font color = CC0000>Score: 0 </font>");
@@ -778,6 +780,12 @@ class MyBrickusListener implements BrickusListener {
 			
 			composite.updateScores(composite.model.calculateScore(Player.PLAYER1), composite.model.calculateScore(Player.PLAYER2));
 			composite.updateSinglePiece(composite.model);
+			if(composite.model.getActivePlayer() == Player.PLAYER1) {
+				composite.updateErrorMessage("<html><font color = 0000CC>Player 1 " + "<font color = 000000>to move.</font>");
+			}
+			else {
+				composite.updateErrorMessage("<html><font color = CC0000>Player 2 </font>" + "<font color = 000000>to move.</font>");
+			}
 		}
 		else {
 			
