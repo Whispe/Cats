@@ -99,6 +99,10 @@ public class MyBrickusFrame extends JFrame {
 		this.setVisible(true);
 	}
 	
+	/**
+	 * Stores the active piece, the piece which the active player clicked on and can now rotate, flip, or place.
+	 * @param panel the new, active SinglePiece object.
+	 */
 	public void pieceClicked(SinglePiece panel) {
 		
 		if(activepiece != null) {
@@ -122,7 +126,6 @@ public class MyBrickusFrame extends JFrame {
 	
 	/**
 	 * Updates a SinglePiece Brickus piece when the model has changed.
-	 * @param model The BrickusModel instance which has been changed.
 	 */
 	public void updateSinglePiece() {
 		
@@ -186,7 +189,7 @@ public class MyBrickusFrame extends JFrame {
 	}
 	
 	/**
-	 * Closes the current, ended game session.
+	 * Closes the current, finished game session.
 	 */
 	public void closeGame() {
 		
@@ -202,8 +205,8 @@ public class MyBrickusFrame extends JFrame {
 	}
 	
 	/**
-	 * This class implements the interface BrickusListener in order to listen for activity in the Brickus game, so that changes
-	 * can be made to the interface when new events occur.
+	 * This class implements the interface BrickusListener in order to listen for activity in the Brickus game, so that
+	 * changes can be made to the interface when new events occur.
 	 */
 	class MyBrickusListener implements BrickusListener {
 		
@@ -217,6 +220,7 @@ public class MyBrickusFrame extends JFrame {
 		/**
 		 * Updates the game interface when an illegal move is made.
 		 * Specifically, an error message explaining the illegal move is displayed in the MyBrickusTracker instance.
+		 * @param event the BrickusIllegalMoveEvent instance representing the illegal move made.
 		 */
 		public void illegalMove(BrickusIllegalMoveEvent event) {
 		
@@ -225,7 +229,7 @@ public class MyBrickusFrame extends JFrame {
 
 		/**
 		 * Updates the game interface when the BrickusModel model is changed.
-		 * @param event The BrickusEvent which changed the model.
+		 * @param event The BrickusEvent instance which changed the model.
 		 */
 		public void modelChanged(BrickusEvent event) {
 			
@@ -234,7 +238,7 @@ public class MyBrickusFrame extends JFrame {
 				updateScores(model.calculateScore(Player.PLAYER1), model.calculateScore(Player.PLAYER2));
 				updateSinglePiece();
 				if(model.getActivePlayer() == Player.PLAYER1) {
-					updateErrorMessage("<html><font color = 0000CC>Player 1 " + "<font color = 000000>to move.</font>");
+					updateErrorMessage("<html><font color = 0000CC>Player 1 </font>" + "<font color = 000000>to move.</font>");
 				}
 				else {
 					updateErrorMessage("<html><font color = CC0000>Player 2 </font>" + "<font color = 000000>to move.</font>");
@@ -246,11 +250,11 @@ public class MyBrickusFrame extends JFrame {
 				
 				if(model.calculateScore(Player.PLAYER1) > model.calculateScore(Player.PLAYER2)) {
 					
-					updateErrorMessage("Game over. Player 1 won with " + model.calculateScore(Player.PLAYER1) + " points.");
+					updateErrorMessage("<html><font color = 000000>Game over. </font>" + "<font color = 0000CC>Player 1 </font>" + "<font color = 000000>won with </font>" + model.calculateScore(Player.PLAYER1) + "<font color = 000000> points.</font>");
 				}
 				else if(model.calculateScore(Player.PLAYER1) < model.calculateScore(Player.PLAYER2)) {
 					
-					updateErrorMessage("Game over. Player 2 won with " + model.calculateScore(Player.PLAYER2) + " points.");
+					updateErrorMessage("<html><font color = 000000>Game over. </font>" + "<font color = CC0000>Player 2 </font>" + "<font color = 000000>won with </font>" + model.calculateScore(Player.PLAYER2) + "<font color = 00000> points.</font>");
 				}
 				else {
 					
@@ -272,6 +276,10 @@ public class MyBrickusFrame extends JFrame {
 		
 		MyBrickusFrame bframe;
 		
+		/**
+		 * Creates an instance of the MyEndButtonListener class.
+		 * @param bframe the MyBrickusFrame instance containing the Brickus interface.
+		 */
 		public MyEndButtonListener(MyBrickusFrame bframe) {
 			
 			this.bframe = bframe;
@@ -293,17 +301,6 @@ public class MyBrickusFrame extends JFrame {
 	 * active player when clicked.
 	 */
 	class MyButtonListener implements java.awt.event.ActionListener {
-
-		public BrickusModel model;
-		
-		/**
-		 * Creates an instance of the MyButtonListener class.
-		 * @param model the BrickusModel containing the game information.
-		 */
-		public MyButtonListener(BrickusModel model) {
-			
-			this.model = model;
-		}
 		
 		/**
 		 * Switches to the next Player when the current, active Player chooses to pass.
@@ -329,8 +326,6 @@ public class MyBrickusFrame extends JFrame {
 		
 		/**
 		 * Constructs an instance of the MyBrickusBoard class.
-		 * @param model the BrickusModel with the game information.
-		 * @param myListener a MouseListener object to listen for activity in the Composite.
 		 */
 		public MyBrickusBoard() {
 			
@@ -350,19 +345,19 @@ public class MyBrickusFrame extends JFrame {
 	        	
 	        	/**
 	        	 * Places the active Brickus piece on the board when the active Player clicks.
-	        	 * @param e the MouseEvent when the mouse is clicked.
+	        	 * @param event the MouseEvent when the mouse is clicked.
 	        	 */
-	        	public void mouseClicked(MouseEvent e) {
+	        	public void mouseClicked(MouseEvent event) {
 	        		
-	        		if(e.getButton() == MouseEvent.BUTTON1) {
+	        		if(event.getButton() == MouseEvent.BUTTON1) {
 		                int width = getWidth();
 		                int height = getHeight();
 		
 		                int cellWidth = width / numCol;
 		                int cellHeight = height / numRow;
 		
-		                coveredx = e.getX() / cellWidth;
-		                coveredy = e.getY() / cellHeight;
+		                coveredx = event.getX() / cellWidth;
+		                coveredy = event.getY() / cellHeight;
 		                coveredCell = new Point(coveredx, coveredy);
 		                placePiece();
 	        		}
@@ -370,17 +365,17 @@ public class MyBrickusFrame extends JFrame {
 		            
 	        	/**
 	        	 * Updates the location of the active Brickus piece's shadow on the board when the Player moves the mouse.
-	        	 * @param e the MouseEvent when the active Player moves the mouse.
+	        	 * @param event the MouseEvent when the active Player moves the mouse.
 	        	 */
-	            public void mouseMoved(MouseEvent e) {
+	            public void mouseMoved(MouseEvent event) {
 	
 	                int width = getWidth();
 	                int height = getHeight();
 	                int cellWidth = width / numCol;
 	                int cellHeight = height / numRow;
 	
-	                coveredx = e.getX() / cellWidth;
-	                coveredy = e.getY() / cellHeight;
+	                coveredx = event.getX() / cellWidth;
+	                coveredy = event.getY() / cellHeight;
 	                coveredCell = new Point(coveredx, coveredy);
 	
 	                repaint();
@@ -513,7 +508,7 @@ public class MyBrickusFrame extends JFrame {
 		
 	/**
 	 * This class represents the second GUI component in the Brickus game, which contains the tray of Brickus pieces left
-	 * for each Player, as well as the Pass button.
+	 * for the active Player, as well as the Pass button.
 	 */
 	class MyBrickusTray extends JPanel {
 		
@@ -523,8 +518,6 @@ public class MyBrickusFrame extends JFrame {
 			
 		/**
 		 * Creates an instance of the MyBrickusTray class.
-		 * @param model the BrickusModel object containing the game information.
-		 * @param myListener the MouseListener for the Composite instance.
 		 */
 		public MyBrickusTray() {
 			
@@ -543,7 +536,7 @@ public class MyBrickusFrame extends JFrame {
 			this.tray = pieceTray;
 				
 			passButton = new JButton("Pass");
-			MyButtonListener buttonListener = new MyButtonListener(model);
+			MyButtonListener buttonListener = new MyButtonListener();
 			passButton.addActionListener(buttonListener);
 			this.buttonListener = buttonListener;
 			constraints.gridx = 7;
@@ -555,7 +548,6 @@ public class MyBrickusFrame extends JFrame {
 			
 		/**
 		 * Updates a SinglePiece object when the model changes.
-		 * @param model the BrickusModel containing the game information.
 		 */
 		public void updateSinglePiece() {
 			
@@ -571,8 +563,6 @@ public class MyBrickusFrame extends JFrame {
 					
 		/**
 		 * Creates an instance of the PieceTray class.
-		 * @param model the BrickusModel containing the game information.
-		 * @param myListener the MouseListener which listens for activity in the Composite instance.
 		 */
 		public PieceTray() {
 			
@@ -588,8 +578,6 @@ public class MyBrickusFrame extends JFrame {
 			
 		/**
 		 * Updates the tray of SinglePiece objects when a model changes.
-		 * @param model the BrickusModel containing the game information.
-		 * @param myListener the MouseListener which listens for activity in the Composite instance.
 		 */
 		public void updateSinglePiece() {
 			
@@ -629,9 +617,9 @@ public class MyBrickusFrame extends JFrame {
 			
 		/**
 		 * Creates an instance of the SinglePiece class.
-		 * @param model the BrickusModel containing the game information.
 		 * @param piece the BrickusPiece instance used to generate the GUI representation in the interface.
-		 * @param myListener the MouseEvent which listens for activity in the Composite instance.
+		 * @param hasListener true if the SinglePiece should have a listener, false otherwise (in the case of empty, placeholder pieces
+		 * holding the empty slots of used pieces).
 		 */
 		public SinglePiece(BrickusPiece piece, boolean hasListener) {
 				
@@ -762,7 +750,6 @@ public class MyBrickusFrame extends JFrame {
 		
 		/**
 		 * Creates an instance of the MyBrickusTracker class.
-		 * @param model the BrickusModel containing the game information.
 		 */
 		public MyBrickusTracker() {
 			
@@ -799,7 +786,7 @@ public class MyBrickusFrame extends JFrame {
 		}
 		
 		/**
-		 * Displays a new error message
+		 * Displays a new error message.
 		 * @param message the String message to be displayed.
 		 */
 		public void newErrorMessage(String message) {
@@ -820,8 +807,7 @@ public class MyBrickusFrame extends JFrame {
 	}
 	
 	/**
-	 * A class which listens for when a mouse is pressed or a mouse wheel is scrolled and updates the active SinglePiece
-	 * accordingly.
+	 * A class which listens for when a mouse is pressed or a mouse wheel is scrolled and updates the active SinglePiece accordingly.
 	 */
 	class MyMouseListener extends MouseAdapter implements MouseWheelListener {
 		
@@ -846,7 +832,8 @@ public class MyBrickusFrame extends JFrame {
 				rightClick();
 			}
 		}
-			/**
+		
+		/**
 		 * Updates the active SinglePiece accordingly when the mouse wheel is scrolled.
 		 */
 		public void mouseWheelMoved(MouseWheelEvent w) {
