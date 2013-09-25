@@ -4,11 +4,17 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import javax.swing.*;
 
 import edu.jhu.cs.oose.fall2013.brickus.iface.*;
+import edu.jhu.cs.tyung1.oose.Composite.SinglePiece;
 
+/**
+ * This class constructs the user interface for the Brickus board game.
+ */
 @SuppressWarnings("serial")
 public class MyBrickusFrame extends JFrame {
 
@@ -22,11 +28,18 @@ public class MyBrickusFrame extends JFrame {
 		gui.go();
 	}
 	
+	/**
+	 * Creates an instance of the MyBrickusFrame class.
+	 * @param model The BrickusModel containing the game logic, memory, and information.
+	 */
 	public MyBrickusFrame(BrickusModel model) {
 		
 		this.model = model;
 	}
 	
+	/**
+	 * Initializes an interface for the Brickus game.
+	 */
 	public void go() {
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -40,6 +53,10 @@ public class MyBrickusFrame extends JFrame {
 	}
 }
 
+/**
+ * This class is a container widget that contains the three main GUI components of the Brickus interface, as well
+ * as shared information, such as the Brickus model, listeners, and colors used.
+ */
 @SuppressWarnings("serial")
 class Composite extends JComponent {
 	
@@ -57,7 +74,15 @@ class Composite extends JComponent {
 	JFrame frame;
 	MyBrickusListener modelListener;
 	
+	/**
+	 * Constructs an instance of a Composite object, which contains the three widgets of the Brickus game interface:
+	 * the board itself, the tray of pieces along with the pass button, and the illegal move notification bar and
+	 * score bars.
+	 * @param model the BrickusModel instance containing the game information.
+	 * @param frame the MyBrickusFrame object containing the interface.
+	 */
 	public Composite(BrickusModel model, MyBrickusFrame frame) {
+		
 		player1color = Color.decode("#0000CC");
 		player2color = Color.decode("#CC0000");
 		player1colorhalf = new Color(0,0,204,120);
@@ -103,11 +128,10 @@ class Composite extends JComponent {
 		this.add(tracker, constraints);
 	}
 	
-	public void updateErrorMessage(String message) {
-		
-		tracker.newErrorMessage(message);
-	}
-	
+	/**
+	 * Stores the active piece, the piece which the active player clicked on and can now rotate, flip, or place.
+	 * @param panel the new, active SinglePiece object.
+	 */
 	public void pieceClicked(SinglePiece panel) {
 		
 		if(activepiece != null) {
@@ -119,11 +143,20 @@ class Composite extends JComponent {
 		board.pieceSelected();
 	}
 	
+	/**
+	 * Updates the score displays in the MyBrickusTracker.
+	 * @param score1 The new score for Player 1.
+	 * @param score2 The new score for Player 2.
+	 */
 	public void updateScores(int score1, int score2) {
 		
 		tracker.newScores(score1, score2);
 	}
 	
+	/**
+	 * Updates a SinglePiece Brickus piece when the model has changed.
+	 * @param model The BrickusModel instance which has been changed.
+	 */
 	public void updateSinglePiece(BrickusModel model) {
 		
 		tray.updateSinglePiece(model);
@@ -131,6 +164,18 @@ class Composite extends JComponent {
 		tray.revalidate();
 	}
 	
+	/**
+	 * Updates the error message in the illegal move notification bar when an illegal move is made.
+	 * @param message The String message explaining the illegal move.
+	 */
+	public void updateErrorMessage(String message) {
+		
+		tracker.newErrorMessage(message);
+	}
+	
+	/**
+	 * Flips a SinglePiece horizontally and refreshes the interface when a Player right clicks with a piece selected.
+	 */
 	public void rightClick(){
 		
 		if(pieceSelected){
@@ -139,6 +184,10 @@ class Composite extends JComponent {
 		}
 	}
 
+	/**
+	 * Flips a SinglePiece vertically and refreshes the interface when a Player presses SHIFT and right clicks with a piece
+	 * selected.
+	 */
 	public void shiftRightClick(){
 		
 		if(pieceSelected){
@@ -147,6 +196,9 @@ class Composite extends JComponent {
 		}
 	}
 	
+	/**
+	 * Rotates a SinglePiece counterclockwise and refreshes the interface when a Player scrolls the mouse wheel upward.
+	 */
 	public void scrollUpWheel(){
 		
 		if(pieceSelected){
@@ -155,6 +207,9 @@ class Composite extends JComponent {
 		}
 	}
 	
+	/**
+	 * Rotates a SinglePiece clockwise and refreshes the interface when a Player scrolls the mouse wheel down.
+	 */
 	public void scrollDownWheel(){
 		
 		if(pieceSelected){
@@ -163,16 +218,25 @@ class Composite extends JComponent {
 		}
 	}
 	
+	/**
+	 * Closes the current, ended game session.
+	 */
 	public void closeGame() {
 		
 		frame.setVisible(false);
 	}
 	
+	/**
+	 * Removes listeners in the interface, so no pieces can be displayed, rotated, flipped, or placed.
+	 */
 	public void removeAllListeners() {
 		
 		model.removeBrickusListener(modelListener);
 	}
 	
+	/**
+	 * This class is the topmost GUI component of the Brickus interface and represents the game board where pieces are placed.
+	 */
 	class MyBrickusBoard extends JComponent {
 
 		int numCol;
@@ -183,6 +247,11 @@ class Composite extends JComponent {
 		int cellWidth = 20;
 		MouseAdapter mouseHandler;
 		
+		/**
+		 * Constructs an instance of the MyBrickusBoard class.
+		 * @param model the BrickusModel with the game information.
+		 * @param myListener a MouseListener object to listen for activity in the Composite.
+		 */
 		public MyBrickusBoard(BrickusModel model, MyMouseListener myListener) {
 			
 			pieceSelected = false;
@@ -199,6 +268,10 @@ class Composite extends JComponent {
 	        MouseAdapter mouseHandler;
 	        mouseHandler = new MouseAdapter() {
 	        	
+	        	/**
+	        	 * Places the active Brickus piece on the board when the active Player clicks.
+	        	 * @param e the MouseEvent when the mouse is clicked.
+	        	 */
 	        	public void mouseClicked(MouseEvent e) {
 	        		
 	        		if(e.getButton() == MouseEvent.BUTTON1) {
@@ -215,6 +288,10 @@ class Composite extends JComponent {
 	        		}
 	        	}
 	            
+	        	/**
+	        	 * Updates the location of the active Brickus piece's shadow on the board when the Player moves the mouse.
+	        	 * @param e the MouseEvent when the active Player moves the mouse.
+	        	 */
 	            public void mouseMoved(MouseEvent e) {
 	
 	                int width = getWidth();
@@ -238,10 +315,18 @@ class Composite extends JComponent {
 	        this.addMouseWheelListener(myListener);
 	        
 		}
+		
+		/**
+		 * Sets a boolean variable to indicate that the active Player has selected a SinglePiece object.
+		 */
 		public void pieceSelected(){
 			
 			pieceSelected = true;
 		}
+		
+		/**
+		 * Places the active SinglePiece on the board.
+		 */
 		public void placePiece(){
 			
 			Player placingPlayer = model.getActivePlayer();
@@ -273,6 +358,11 @@ class Composite extends JComponent {
 			}
 		}
 		
+		/**
+		 * Draws the board lines and colors in the squares to depict Player brick locations (blue for Player 1, red for 
+		 * Player 2).
+		 * @param g the Graphics object representing the Brickus with lines and colors.
+		 */
 		public void paintComponent(Graphics g) {
 			
             super.paintComponent(g);
@@ -341,13 +431,22 @@ class Composite extends JComponent {
 		}
 	}
 	
+	/**
+	 * This class represents the second GUI component in the Brickus game, which contains the tray of Brickus pieces left
+	 * for each Player, as well as the Pass button.
+	 */
 	class MyBrickusTray extends JPanel {
 		
 		JButton passButton;
 		MyButtonListener buttonListener;
-		pieceTray tray;
+		PieceTray tray;
 		MyMouseListener myListener;
 		
+		/**
+		 * Creates an instance of the MyBrickusTray class.
+		 * @param model the BrickusModel object containing the game information.
+		 * @param myListener the MouseListener for the Composite instance.
+		 */
 		public MyBrickusTray(BrickusModel model, MyMouseListener myListener) {
 			
 			this.myListener = myListener;
@@ -357,14 +456,14 @@ class Composite extends JComponent {
 			GridBagConstraints constraints = new GridBagConstraints();
 			constraints.fill = GridBagConstraints.BOTH;
 			
-			pieceTray pieceTray = new pieceTray(model, myListener);
-			pieceTray.setBorder(BorderFactory.createLineBorder(Color.black));
+			PieceTray PieceTray = new PieceTray(model, myListener);
+			PieceTray.setBorder(BorderFactory.createLineBorder(Color.black));
 			constraints.gridx = 0;
 			constraints.gridy = 0;
 			constraints.gridwidth = 7;
 			constraints.weightx = 1;
-			this.add(pieceTray, constraints);
-			this.tray = pieceTray;
+			this.add(PieceTray, constraints);
+			this.tray = PieceTray;
 			
 			passButton = new JButton("Pass");
 			MyButtonListener buttonListener = new MyButtonListener(model);
@@ -377,17 +476,30 @@ class Composite extends JComponent {
 			this.add(passButton, constraints);
 		}
 		
+		/**
+		 * Updates a SinglePiece object when the model changes.
+		 * @param model the BrickusModel containing the game information.
+		 */
 		public void updateSinglePiece(BrickusModel model) {
 			
 			this.tray.updateSinglePiece(model, myListener);
 		}
 	}
 	
-	class pieceTray extends JPanel {
+	/**
+	 * This class represents the tray displaying the Brickus pieces left for the active Player.
+	 * This class differs from MyBrickusTray in that the latter also contains the Pass button.
+	 */
+	class PieceTray extends JPanel {
 		
 		MyMouseListener myListener;
 		
-		public pieceTray(BrickusModel model, MyMouseListener myListener) {
+		/**
+		 * Creates an instance of the PieceTray class.
+		 * @param model the BrickusModel containing the game information.
+		 * @param myListener the MouseListener which listens for activity in the Composite instance.
+		 */
+		public PieceTray(BrickusModel model, MyMouseListener myListener) {
 			
 			this.myListener = myListener;
 			this.setLayout(new GridLayout(3, 7));
@@ -400,6 +512,11 @@ class Composite extends JComponent {
 			}
 		}
 		
+		/**
+		 * Updates the tray of SinglePiece objects when a model changes.
+		 * @param model the BrickusModel containing the game information.
+		 * @param myListener the MouseListener which listens for activity in the Composite instance.
+		 */
 		public void updateSinglePiece(BrickusModel model, MyMouseListener myListener) {
 			
 			int count = 0;
@@ -429,10 +546,19 @@ class Composite extends JComponent {
 		}
 	}
 	
+	/**
+	 * This class represents a single Brickus piece within the piece tray.
+	 */
 	class SinglePiece extends JPanel {
 		
 		BrickusPiece piece;
 		
+		/**
+		 * Creates an instance of the SinglePiece class.
+		 * @param model the BrickusModel containing the game information.
+		 * @param piece the BrickusPiece instance used to generate the GUI representation in the interface.
+		 * @param myListener the MouseEvent which listens for activity in the Composite instance.
+		 */
 		public SinglePiece(BrickusModel model, BrickusPiece piece, MyMouseListener myListener) {
 			
 			this.piece = piece;
@@ -498,7 +624,7 @@ class Composite extends JComponent {
 		}
 		
 		/**
-		 * 
+		 * Calculates the number of rows or columns which must be skipped when drawing a SinglePiece centered in a 5x5 grid.
 		 * @param pieceDimension the height or width of the Brickus piece being centered in the 5x5 grid.
 		 * @return the number of rows (for height) or columns (for width) that must be skipped to center a piece
 		 * in a 5x5 grid.
@@ -545,6 +671,11 @@ class Composite extends JComponent {
 		}
 	}
 	
+	/**
+	 * This class represents the bottom GUI component in the Brickus interface, which displays an explanatory message when
+	 * a Player attempts to make an illegal move.
+	 * The score displays are also changed when the active Player places a piece.
+	 */
 	class MyBrickusTracker extends JPanel {
 		
 		JLabel errorText;
@@ -553,6 +684,10 @@ class Composite extends JComponent {
 		JLabel player3Score;
 		JLabel player4Score;
 		
+		/**
+		 * Creates an instance of the MyBrickusTracker class.
+		 * @param model the BrickusModel containing the game information.
+		 */
 		public MyBrickusTracker(BrickusModel model) {
 			
 			this.setLayout(new GridBagLayout());
@@ -585,11 +720,20 @@ class Composite extends JComponent {
 			this.add(subpanelRight, constraints);
 		}
 		
+		/**
+		 * Displays a new error message
+		 * @param message the String message to be displayed.
+		 */
 		public void newErrorMessage(String message) {
 			
 			errorText.setText(message);
 		}
 		
+		/**
+		 * Displays the updated scores for Player 1 and Player 2.
+		 * @param score1 The updated score for Player 1.
+		 * @param score2 The updated score for Player 2.
+		 */
 		public void newScores(int score1, int score2) {
 			
 			player1Score.setText("<html><font color = 0000CC>Score: " + score1 + "</font>");
@@ -598,10 +742,18 @@ class Composite extends JComponent {
 	}
 }
 
+/**
+ * This class implements the interface BrickusListener in order to listen for activity in the Brickus game, so that changes
+ * can be made to the interface when new events occur.
+ */
 class MyBrickusListener implements BrickusListener {
 
 	public Composite composite;
 	
+	/**
+	 * Creates an instance of the MyBrickusListener class.
+	 * @param composite the Composite instance containing the Brickus interface.
+	 */
 	public MyBrickusListener(Composite composite) {
 		
 		this.composite = composite;
@@ -609,7 +761,7 @@ class MyBrickusListener implements BrickusListener {
 	
 	/**
 	 * Updates the game interface when an illegal move is made.
-	 * Specifically, 
+	 * Specifically, an error message explaining the illegal move is displayed in the MyBrickusTracker instance.
 	 */
 	public void illegalMove(BrickusIllegalMoveEvent event) {
 	
@@ -652,18 +804,26 @@ class MyBrickusListener implements BrickusListener {
 }
 
 /**
- * An ActionListener class which listens for the "New Game" button to be clicked and creates a new game when
- * the event occurs.
+ * A class which implements the ActionListener interface to listen for when the "New Game" button is clicked and creates a new
+ * game when the event occurs.
  */
 class MyEndButtonListener implements java.awt.event.ActionListener {
 	
 	Composite composite;
 	
+	/**
+	 * Creates an instance of the MyEndButtonListener class.
+	 * @param composite the Composite instance containing the Brickus interface.
+	 */
 	public MyEndButtonListener(Composite composite) {
 		
 		this.composite = composite;
 	}
 	
+	/**
+	 * Closes the current game session and opens a new game.
+	 * @param event the Event when the New Game button is clicked.
+	 */
 	public void actionPerformed(ActionEvent event) {
 	
 		composite.closeGame();
@@ -672,20 +832,82 @@ class MyEndButtonListener implements java.awt.event.ActionListener {
 }
 
 /**
- * An ActionListener class which listens for the "Pass" button to be clicked and changes the active player
- * when clicked.
+ * A class which implements the ActionListener interface to listen for when the "Pass" button is clicked and changes the
+ * active player when clicked.
  */
 class MyButtonListener implements java.awt.event.ActionListener {
 
 	public BrickusModel model;
 	
+	/**
+	 * Creates an instance of the MyButtonListener class.
+	 * @param model the BrickusModel containing the game information.
+	 */
 	public MyButtonListener(BrickusModel model) {
 		
 		this.model = model;
 	}
 	
+	/**
+	 * Switches to the next Player when the current, active Player chooses to pass.
+	 */
 	public void actionPerformed(ActionEvent event) {
 	
 		model.pass(model.getActivePlayer());
+	}
+}
+
+/**
+ * A class which listens for when a mouse is pressed or a mouse wheel is scrolled and updates the active SinglePiece
+ * accordingly.
+ */
+class MyMouseListener extends MouseAdapter implements MouseWheelListener {
+	
+	private Composite composite;
+
+	/**
+	 * Creates an instance of the MyMouseListener class.
+	 * @param composite the Composite containing the game interface.
+	 */
+	public MyMouseListener(Composite composite) {
+		   
+		this.composite = composite;
+	}
+
+	/**
+	 * Updates the active SinglePiece accordingly when a mouse is pressed.
+	 */
+	public void mousePressed(MouseEvent e) {
+		
+		if (e.getButton() == MouseEvent.BUTTON1) {
+    	  
+			if(e.getSource() instanceof SinglePiece) {
+    		  
+				composite.pieceClicked((SinglePiece)e.getSource());
+			}
+		} 
+		else if (e.isShiftDown() && e.getButton() == MouseEvent.BUTTON3) {
+    	  
+			composite.shiftRightClick();
+		}
+		else if(!e.isShiftDown() && e.getButton() == MouseEvent.BUTTON3) {
+    	  
+			composite.rightClick();
+		}
+	}
+
+	/**
+	 * Updates the active SinglePiece accordingly when the mouse wheel is scrolled.
+	 */
+	public void mouseWheelMoved(MouseWheelEvent w) {
+	   
+		if(w.getWheelRotation() < 0) {
+		   
+			composite.scrollUpWheel();   
+		}
+		else {
+		   
+			composite.scrollDownWheel();
+		}
 	}
 }
