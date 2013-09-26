@@ -112,7 +112,9 @@ public class MyBrickusFrame extends JFrame {
 		activepiece = panel;
 		activepiece.selected();
 		board.pieceSelected();
-		updateSinglePiece();
+		if(model.getActivePlayer() != null) {
+			updateSinglePiece();
+		}
 	}
 	
 	/**
@@ -203,117 +205,6 @@ public class MyBrickusFrame extends JFrame {
 	public void removeAllListeners() {
 		
 		model.removeBrickusListener(modelListener);
-		board.removeMouseMotionListener(board.mouseHandler);
-		board.removeMouseListener(board.mouseHandler);
-		board.removeMouseListener(myListener);
-		board.removeMouseWheelListener(myListener);
-	}
-	
-	/**
-	 * This class implements the interface BrickusListener in order to listen for activity in the Brickus game, so that
-	 * changes can be made to the interface when new events occur.
-	 */
-	class MyBrickusListener implements BrickusListener {
-		
-		MyBrickusFrame bframe;
-		
-		public MyBrickusListener(MyBrickusFrame bframe) {
-			
-			this.bframe = bframe;
-		}
-		
-		/**
-		 * Updates the game interface when an illegal move is made.
-		 * Specifically, an error message explaining the illegal move is displayed in the MyBrickusTracker instance.
-		 * @param event the BrickusIllegalMoveEvent instance representing the illegal move made.
-		 */
-		public void illegalMove(BrickusIllegalMoveEvent event) {
-		
-			updateErrorMessage(event.getMessage());
-		}
-
-		/**
-		 * Updates the game interface when the BrickusModel model is changed.
-		 * @param event The BrickusEvent instance which changed the model.
-		 */
-		public void modelChanged(BrickusEvent event) {
-			
-			if(!event.isGameOver()) {
-				
-				updateScores(model.calculateScore(Player.PLAYER1), model.calculateScore(Player.PLAYER2));
-				updateSinglePiece();
-				if(model.getActivePlayer() == Player.PLAYER1) {
-					updateErrorMessage("<html><font color = 0000CC>Player 1 </font>" + "<font color = 000000>to move.</font>");
-				}
-				else {
-					updateErrorMessage("<html><font color = CC0000>Player 2 </font>" + "<font color = 000000>to move.</font>");
-				}
-			}
-			else {
-				
-				removeAllListeners();
-				
-				if(model.calculateScore(Player.PLAYER1) > model.calculateScore(Player.PLAYER2)) {
-					
-					updateErrorMessage("<html><font color = 000000>Game over. </font>" + "<font color = 0000CC>Player 1 </font>" + "<font color = 000000>won with </font>" + model.calculateScore(Player.PLAYER1) + "<font color = 000000> points.</font>");
-				}
-				else if(model.calculateScore(Player.PLAYER1) < model.calculateScore(Player.PLAYER2)) {
-					
-					updateErrorMessage("<html><font color = 000000>Game over. </font>" + "<font color = CC0000>Player 2 </font>" + "<font color = 000000>won with </font>" + model.calculateScore(Player.PLAYER2) + "<font color = 00000> points.</font>");
-				}
-				else {
-					
-					updateErrorMessage("Game over. Players tied.");
-				}
-				
-				tray.passButton.setText("New game");
-				tray.passButton.removeActionListener(tray.buttonListener);
-				tray.passButton.addActionListener(new MyEndButtonListener(bframe));
-			}
-		}
-	}
-
-	/**
-	 * A class which implements the ActionListener interface to listen for when the "New Game" button is clicked and creates a new
-	 * game when the event occurs.
-	 */
-	class MyEndButtonListener implements java.awt.event.ActionListener {
-		
-		MyBrickusFrame bframe;
-		
-		/**
-		 * Creates an instance of the MyEndButtonListener class.
-		 * @param bframe the MyBrickusFrame instance containing the Brickus interface.
-		 */
-		public MyEndButtonListener(MyBrickusFrame bframe) {
-			
-			this.bframe = bframe;
-		}
-		
-		/**
-		 * Closes the current game session and opens a new game.
-		 * @param event the Event when the New Game button is clicked.
-		 */
-		public void actionPerformed(ActionEvent event) {
-		
-			bframe.closeGame();
-			MyBrickusFrame.main(null);
-		}
-	}
-
-	/**
-	 * A class which implements the ActionListener interface to listen for when the "Pass" button is clicked and changes the
-	 * active player when clicked.
-	 */
-	class MyButtonListener implements java.awt.event.ActionListener {
-		
-		/**
-		 * Switches to the next Player when the current, active Player chooses to pass.
-		 */
-		public void actionPerformed(ActionEvent event) {
-		
-			model.pass(model.getActivePlayer());
-		}
 	}
 		
 	/**
@@ -591,26 +482,24 @@ public class MyBrickusFrame extends JFrame {
 			this.removeAll();
 			this.repaint();
 			
-			if(model.getActivePlayer() != null) {
-				for(BrickusPiece piece: model.getPieces(model.getActivePlayer())) {
+			for(BrickusPiece piece: model.getPieces(model.getActivePlayer())) {
 				
-					SinglePiece newPiece = new SinglePiece(piece, true);
-					if(activepiece != null) {
+				SinglePiece newPiece = new SinglePiece(piece, true);
+				if(activepiece != null) {
 					
-						if(activepiece.piece == piece) {
+					if(activepiece.piece == piece) {
 						
-							newPiece.selected();
-						}
+						newPiece.selected();
 					}
-					this.add(newPiece);
-					count++;
 				}
+				this.add(newPiece);
+				count++;
+			}
 				
-				for(int i=count; i<21; i++) {
+			for(int i=count; i<21; i++) {
 					
-					SinglePiece newPiece = new SinglePiece(null, false);
-					this.add(newPiece);
-				}
+				SinglePiece newPiece = new SinglePiece(null, false);
+				this.add(newPiece);
 			}
 		}
 	}
@@ -730,7 +619,9 @@ public class MyBrickusFrame extends JFrame {
 		 */
 		public void selected() {
 			
-			this.setBackground(Color.yellow);
+			if(model.getActivePlayer() != null) {
+				this.setBackground(Color.yellow);
+			}
 		}
 		
 		/**
@@ -853,6 +744,117 @@ public class MyBrickusFrame extends JFrame {
 			   
 				scrollDownWheel();
 			}
+		}
+	}
+	
+	/**
+	 * This class implements the interface BrickusListener in order to listen for activity in the Brickus game, so that
+	 * changes can be made to the interface when new events occur.
+	 */
+	class MyBrickusListener implements BrickusListener {
+		
+		MyBrickusFrame bframe;
+		
+		public MyBrickusListener(MyBrickusFrame bframe) {
+			
+			this.bframe = bframe;
+		}
+		
+		/**
+		 * Updates the game interface when an illegal move is made.
+		 * Specifically, an error message explaining the illegal move is displayed in the MyBrickusTracker instance.
+		 * @param event the BrickusIllegalMoveEvent instance representing the illegal move made.
+		 */
+		public void illegalMove(BrickusIllegalMoveEvent event) {
+		
+			updateErrorMessage(event.getMessage());
+		}
+
+		/**
+		 * Updates the game interface when the BrickusModel model is changed.
+		 * @param event The BrickusEvent instance which changed the model.
+		 */
+		public void modelChanged(BrickusEvent event) {
+			
+			if(!event.isGameOver()) {
+				
+				updateScores(model.calculateScore(Player.PLAYER1), model.calculateScore(Player.PLAYER2));
+				updateSinglePiece();
+				if(model.getActivePlayer() == Player.PLAYER1) {
+					updateErrorMessage("<html><font color = 0000CC>Player 1 </font>" + "<font color = 000000>to move.</font>");
+				}
+				else {
+					updateErrorMessage("<html><font color = CC0000>Player 2 </font>" + "<font color = 000000>to move.</font>");
+				}
+			}
+			else {
+				
+				removeAllListeners();
+				board.removeMouseMotionListener(board.mouseHandler);
+				board.removeMouseListener(board.mouseHandler);
+				board.removeMouseListener(myListener);
+				board.removeMouseWheelListener(myListener);
+				
+				if(model.calculateScore(Player.PLAYER1) > model.calculateScore(Player.PLAYER2)) {
+					
+					updateErrorMessage("<html><font color = 000000>Game over. </font>" + "<font color = 0000CC>Player 1 </font>" + "<font color = 000000>won with </font>" + model.calculateScore(Player.PLAYER1) + "<font color = 000000> points.</font>");
+				}
+				else if(model.calculateScore(Player.PLAYER1) < model.calculateScore(Player.PLAYER2)) {
+					
+					updateErrorMessage("<html><font color = 000000>Game over. </font>" + "<font color = CC0000>Player 2 </font>" + "<font color = 000000>won with </font>" + model.calculateScore(Player.PLAYER2) + "<font color = 00000> points.</font>");
+				}
+				else {
+					
+					updateErrorMessage("Game over. Players tied.");
+				}
+				
+				tray.passButton.setText("New game");
+				tray.passButton.removeActionListener(tray.buttonListener);
+				tray.passButton.addActionListener(new MyEndButtonListener(bframe));
+			}
+		}
+	}
+
+	/**
+	 * A class which implements the ActionListener interface to listen for when the "New Game" button is clicked and creates a new
+	 * game when the event occurs.
+	 */
+	class MyEndButtonListener implements java.awt.event.ActionListener {
+		
+		MyBrickusFrame bframe;
+		
+		/**
+		 * Creates an instance of the MyEndButtonListener class.
+		 * @param bframe the MyBrickusFrame instance containing the Brickus interface.
+		 */
+		public MyEndButtonListener(MyBrickusFrame bframe) {
+			
+			this.bframe = bframe;
+		}
+		
+		/**
+		 * Closes the current game session and opens a new game.
+		 * @param event the Event when the New Game button is clicked.
+		 */
+		public void actionPerformed(ActionEvent event) {
+		
+			bframe.closeGame();
+			MyBrickusFrame.main(null);
+		}
+	}
+
+	/**
+	 * A class which implements the ActionListener interface to listen for when the "Pass" button is clicked and changes the
+	 * active player when clicked.
+	 */
+	class MyButtonListener implements java.awt.event.ActionListener {
+		
+		/**
+		 * Switches to the next Player when the current, active Player chooses to pass.
+		 */
+		public void actionPerformed(ActionEvent event) {
+		
+			model.pass(model.getActivePlayer());
 		}
 	}
 }
